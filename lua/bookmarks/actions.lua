@@ -196,7 +196,7 @@ M.refresh = function(bufnr)
 end
 
 function M.loadBookmarks()
-  if utils.path_exists(config.save_file) then
+  if config.save_file and utils.path_exists(config.save_file) then
     utils.read_file(config.save_file, function(data)
       config.cache = vim.json.decode(data)
       config.marks = data

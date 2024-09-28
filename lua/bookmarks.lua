@@ -51,7 +51,9 @@ M.detach_all = void(function(bufnr)
   bufnr = bufnr or current_buf()
   scheduler()
   actions.detach(bufnr)
-  actions.saveBookmarks()
+  if config.save_file then
+    actions.saveBookmarks()
+  end
 end)
 
 local function on_or_after_vimenter(fn)

@@ -13,7 +13,7 @@ M.schema = {
   },
   save_file = {
     type = 'string',
-    default = vim.fn.expand('$HOME/.bookmarks'),
+    default = nil,
   },
   sign_priority = {
     type = 'number',
