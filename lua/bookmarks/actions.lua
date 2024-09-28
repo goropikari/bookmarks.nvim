@@ -17,12 +17,14 @@ M.detach = function(bufnr, keep_signs)
   end
 end
 
+local cache = require('bookmarks.cache').cache
+
 local function updateBookmarks(bufnr, lnum, mark, ann)
   local filepath = uv.fs_realpath(api.nvim_buf_get_name(bufnr))
   if filepath == nil then
     return
   end
-  local data = config.cache['data']
+  local data = cache['data']
   local marks = data[filepath]
   local isIns = false
   if lnum == -1 then
@@ -87,7 +89,7 @@ end
 M.bookmark_line = function(lnum, bufnr)
   bufnr = bufnr or current_buf()
   local file = uv.fs_realpath(api.nvim_buf_get_name(bufnr))
-  local marks = config.cache['data'][file] or {}
+  local marks = cache['data'][file] or {}
   return lnum and marks[tostring(lnum)] or marks
 end
 
@@ -156,7 +158,7 @@ M.bookmark_next = function()
 end
 
 M.bookmark_list = function()
-  local allmarks = config.cache.data
+  local allmarks = cache.data
   local marklist = {}
   for k, ma in pairs(allmarks) do
     if utils.path_exists(k) == false then
@@ -175,7 +177,7 @@ M.refresh = function(bufnr)
   if file == nil then
     return
   end
-  local marks = config.cache.data[file]
+  local marks = cache.data[file]
   local signlines = {}
   if marks then
     for k, v in pairs(marks) do
@@ -198,22 +200,25 @@ end
 function M.loadBookmarks()
   if config.save_file and utils.path_exists(config.save_file) then
     utils.read_file(config.save_file, function(data)
-      config.cache = vim.json.decode(data)
+      cache = vim.json.decode(data)
       config.marks = data
     end)
   end
 end
 
 function M.saveBookmarks()
-  local data = vim.json.encode(config.cache)
+  local data = vim.json.encode(cache)
   if config.marks ~= data then
     utils.write_file(config.save_file, data)
   end
 end
 
 function M.bookmark_clear_all()
-  config.cache = schema.cache.default
-  M.saveBookmarks()
+  cache.reset()
+  signs:reset()
+  if config.save_file then
+    M.saveBookmarks()
+  end
 end
 
 return M

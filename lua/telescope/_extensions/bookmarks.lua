@@ -12,6 +12,8 @@ local utils = require('telescope.utils')
 
 local action_state = require('telescope.actions.state')
 
+local cache = require('bookmarks.cache').cache
+
 local function get_text(annotation)
   local pref = string.sub(annotation, 1, 2)
   local ret = config.keywords[pref]
@@ -21,9 +23,7 @@ local function get_text(annotation)
   return ret .. annotation
 end
 
-local function bookmark(opts)
-  opts = opts or {}
-  local allmarks = config.cache.data
+local function build_marklist(allmarks)
   local marklist = {}
   for k, ma in pairs(allmarks) do
     for l, v in pairs(ma) do
@@ -34,6 +34,13 @@ local function bookmark(opts)
       })
     end
   end
+  return marklist
+end
+
+local function bookmark(opts)
+  opts = opts or {}
+  local allmarks = cache.data
+  print(vim.inspect(allmarks))
   local display = function(entry)
     local displayer = entry_display.create({
       separator = '▏',
@@ -52,19 +59,8 @@ local function bookmark(opts)
   end
 
   local function bookmarks_finder()
-    -- local allmarks = config.cache.data
-    -- local marklist = {}
-    -- for k, ma in pairs(allmarks) do
-    --   for l, v in pairs(ma) do
-    --     table.insert(marklist, {
-    --       filename = k,
-    --       lnum = tonumber(l),
-    --       text = v.a and get_text(v.a) or v.m,
-    --     })
-    --   end
-    -- end
     return finders.new_table({
-      results = marklist,
+      results = build_marklist(allmarks),
       entry_maker = function(entry)
         return {
           valid = true,
@@ -106,7 +102,7 @@ local function bookmark(opts)
       return
     end
 
-    local data = config.cache['data']
+    local data = cache['data']
 
     local filepath = selection.filename
     local lnum = tostring(selection.lnum)

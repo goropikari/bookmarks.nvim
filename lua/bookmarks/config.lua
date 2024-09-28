@@ -6,11 +6,6 @@ M.schema = {
     type = 'table',
     default = { ['@t'] = '☑️ ', ['@w'] = '⚠️ ', ['@f'] = '⛏ ', ['@n'] = ' ' },
   },
-  cache = {
-    type = 'table',
-    deep_extend = true,
-    default = { data = {} },
-  },
   save_file = {
     type = 'string',
     default = nil,
