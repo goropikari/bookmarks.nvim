@@ -1,5 +1,4 @@
 local api = vim.api
-local config = require('bookmarks.config').config
 
 local M = {}
 
@@ -26,22 +25,22 @@ function M:remove(bufnr, start_lnum)
 end
 
 function M:add(bufnr, signs)
-  local cfg = self.config
+  local signs_cfg = self.config
   local isExt = true
   local line_count = api.nvim_buf_line_count(bufnr)
   for _, s in ipairs(signs) do
     if not (s.lnum > line_count) and not self:contains(bufnr, s.lnum) then
       isExt = false
-      local cs = cfg[s.type]
+      local cs = signs_cfg[s.type]
       local text = s.text or cs.text
 
       api.nvim_buf_set_extmark(bufnr, self.ns, s.lnum - 1, -1, {
         id = s.lnum,
         sign_text = text,
-        priority = config.sign_priority,
+        priority = signs_cfg.sign_priority,
         sign_hl_group = cs.hl,
-        number_hl_group = config.numhl and cs.numhl or nil,
-        line_hl_group = config.linehl and cs.linehl or nil,
+        number_hl_group = signs_cfg.numhl and cs.numhl or nil,
+        line_hl_group = signs_cfg.linehl and cs.linehl or nil,
       })
     end
   end

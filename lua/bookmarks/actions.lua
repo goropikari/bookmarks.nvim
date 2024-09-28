@@ -1,5 +1,4 @@
-local config = require('bookmarks.config').config
-local schema = require('bookmarks.config').schema
+local cfg = require('bookmarks.config')
 local uv = vim.loop
 local Signs = require('bookmarks.signs')
 local utils = require('bookmarks.util')
@@ -7,8 +6,8 @@ local api = vim.api
 local current_buf = api.nvim_get_current_buf
 local M = {}
 local signs
-M.setup = function()
-  signs = Signs.new(config.signs)
+M.setup = function(signs_cfg)
+  signs = Signs.new(signs_cfg.signs)
 end
 
 M.detach = function(bufnr, keep_signs)
@@ -17,14 +16,14 @@ M.detach = function(bufnr, keep_signs)
   end
 end
 
-local cache = require('bookmarks.cache').cache
+local cm = require('bookmarks.cache')
 
 local function updateBookmarks(bufnr, lnum, mark, ann)
   local filepath = uv.fs_realpath(api.nvim_buf_get_name(bufnr))
   if filepath == nil then
     return
   end
-  local data = cache['data']
+  local data = cm.cache.data
   local marks = data[filepath]
   local isIns = false
   if lnum == -1 then
@@ -55,12 +54,12 @@ end
 
 M.toggle_signs = function(value)
   if value ~= nil then
-    config.signcolumn = value
+    cfg.config.signcolumn = value
   else
-    config.signcolumn = not config.signcolumn
+    cfg.config.signcolumn = not cfg.config.signcolumn
   end
   M.refresh()
-  return config.signcolumn
+  return cfg.config.signcolumn
 end
 
 M.bookmark_toggle = function()
@@ -89,7 +88,7 @@ end
 M.bookmark_line = function(lnum, bufnr)
   bufnr = bufnr or current_buf()
   local file = uv.fs_realpath(api.nvim_buf_get_name(bufnr))
-  local marks = cache['data'][file] or {}
+  local marks = cm.cache.data.file or {}
   return lnum and marks[tostring(lnum)] or marks
 end
 
@@ -107,7 +106,7 @@ M.bookmark_ann = function()
     end
     local line = api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, false)[1]
     signs:remove(bufnr, lnum)
-    local text = config.keywords[string.sub(answer or '', 1, 2)]
+    local text = cfg.config.keywords[string.sub(answer or '', 1, 2)]
     if text then
       signlines[1]['text'] = text
     end
@@ -158,7 +157,7 @@ M.bookmark_next = function()
 end
 
 M.bookmark_list = function()
-  local allmarks = cache.data
+  local allmarks = cm.cache.data
   local marklist = {}
   for k, ma in pairs(allmarks) do
     if utils.path_exists(k) == false then
@@ -177,7 +176,7 @@ M.refresh = function(bufnr)
   if file == nil then
     return
   end
-  local marks = cache.data[file]
+  local marks = cm.cache.data[file]
   local signlines = {}
   if marks then
     for k, v in pairs(marks) do
@@ -186,7 +185,7 @@ M.refresh = function(bufnr)
         lnum = tonumber(k),
       }
       local pref = string.sub(v.a or '', 1, 2)
-      local text = config.keywords[pref]
+      local text = cfg.config.keywords[pref]
       if text then
         ma['text'] = text
       end
@@ -198,27 +197,24 @@ M.refresh = function(bufnr)
 end
 
 function M.loadBookmarks()
-  if config.save_file and utils.path_exists(config.save_file) then
-    utils.read_file(config.save_file, function(data)
-      cache = vim.json.decode(data)
-      config.marks = data
+  if cfg.config.save_file and utils.path_exists(cfg.config.save_file) then
+    utils.read_file(cfg.config.save_file, function(data)
+      cm.cache = vim.json.decode(data)
+      cfg.config.marks = data
     end)
   end
 end
 
 function M.saveBookmarks()
-  local data = vim.json.encode(cache)
-  if config.marks ~= data then
-    utils.write_file(config.save_file, data)
+  local data = vim.json.encode(cm.cache)
+  if cfg.config.marks ~= data then
+    utils.write_file(cfg.config.save_file, data)
   end
 end
 
 function M.bookmark_clear_all()
-  cache.reset()
+  cm.reset()
   signs:reset()
-  if config.save_file then
-    M.saveBookmarks()
-  end
 end
 
 return M

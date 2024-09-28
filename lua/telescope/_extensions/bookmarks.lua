@@ -7,18 +7,18 @@ local finders = require('telescope.finders')
 local pickers = require('telescope.pickers')
 local entry_display = require('telescope.pickers.entry_display')
 local conf = require('telescope.config').values
-local config = require('bookmarks.config').config
+local cfg = require('bookmarks.config')
 local utils = require('telescope.utils')
 
 local action_state = require('telescope.actions.state')
 
-local cache = require('bookmarks.cache').cache
+local cm = require('bookmarks.cache')
 
 local function get_text(annotation)
   local pref = string.sub(annotation, 1, 2)
-  local ret = config.keywords[pref]
+  local ret = cfg.config.keywords[pref]
   if ret == nil then
-    ret = config.signs.ann.text .. ' '
+    ret = cfg.config.signs.ann.text .. ' '
   end
   return ret .. annotation
 end
@@ -39,8 +39,7 @@ end
 
 local function bookmark(opts)
   opts = opts or {}
-  local allmarks = cache.data
-  print(vim.inspect(allmarks))
+  local allmarks = cm.cache.data
   local display = function(entry)
     local displayer = entry_display.create({
       separator = '▏',
@@ -102,7 +101,7 @@ local function bookmark(opts)
       return
     end
 
-    local data = cache['data']
+    local data = cm.cache.data
 
     local filepath = selection.filename
     local lnum = tostring(selection.lnum)

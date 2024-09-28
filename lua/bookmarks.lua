@@ -3,7 +3,7 @@ local scheduler = require('bookmarks.async').scheduler
 local api = vim.api
 -- local uv = vim.loop
 local current_buf = api.nvim_get_current_buf
-local config = require('bookmarks.config')
+local cfg = require('bookmarks.config')
 local nvim = require('bookmarks.nvim')
 local hl = require('bookmarks.highlight')
 local actions = require('bookmarks.actions')
@@ -36,8 +36,8 @@ M.attach = void(function(bufnr)
   bufnr = bufnr or current_buf()
   scheduler()
   actions.loadBookmarks()
-  if config.config.on_attach then
-    config.config.on_attach(bufnr)
+  if cfg.config.on_attach then
+    cfg.config.on_attach(bufnr)
   end
   if not api.nvim_buf_is_loaded(bufnr) then
     return
@@ -51,7 +51,7 @@ M.detach_all = void(function(bufnr)
   bufnr = bufnr or current_buf()
   scheduler()
   actions.detach(bufnr)
-  if config.save_file then
+  if cfg.config.save_file then
     actions.saveBookmarks()
   end
 end)
@@ -67,9 +67,9 @@ local function on_or_after_vimenter(fn)
   end
 end
 
-M.setup = void(function(cfg)
-  config.build(cfg)
-  actions.setup()
+M.setup = void(function(user_cfg)
+  local config = cfg.build(user_cfg)
+  actions.setup(config)
   nvim.augroup('bookmarks')
   autocmd('VimLeavePre', M.detach_all)
   autocmd('ColorScheme', hl.setup_highlights)

@@ -1,7 +1,7 @@
 local M = {}
 
 M.cache = { data = {} }
-function M.cache.reset()
+function M.reset()
   M.cache.data = {}
 end
 
