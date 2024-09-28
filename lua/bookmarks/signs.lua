@@ -4,6 +4,7 @@ local M = {}
 
 local group_base = 'bookmarks_extmark_signs_'
 
+---@param cfg SignConfig
 function M.new(cfg, name)
   local self = setmetatable({}, { __index = M })
   self.config = cfg

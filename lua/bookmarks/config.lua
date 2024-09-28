@@ -1,6 +1,22 @@
 local M = {}
+
+---@class Config
+---@field keywords table<string,string>
+---@field save_file string|nil
+---@field sign_priority number
+---@field signcolumn boolean
+---@field numhl boolean
+---@field linehl boolean
+---@field on_attach fun()|nil
+---@field signs SignConfig
+
+---@class SignConfig
+
+---@type Config
+---@diagnostic disable-next-line
 M.config = {}
 
+---@type Config
 local default_config = {
   keywords = { ['@t'] = '☑️ ', ['@w'] = '⚠️ ', ['@f'] = '⛏ ', ['@n'] = ' ' },
   save_file = vim.fn.stdpath('state') .. '/bookmarks.nvim/bookmark',

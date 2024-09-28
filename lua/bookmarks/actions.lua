@@ -6,6 +6,8 @@ local api = vim.api
 local current_buf = api.nvim_get_current_buf
 local M = {}
 local signs
+
+---@param signs_cfg Config
 M.setup = function(signs_cfg)
   signs = Signs.new(signs_cfg.signs)
 end

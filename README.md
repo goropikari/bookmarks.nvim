@@ -16,55 +16,76 @@ A Bookmarks Plugin With Global File Store For Neovim Written In Lua.
 
 ## Installation
 
-With [packer.nvim]:
+lazy.nvim
 
 ```lua
-use {
-'tomasky/bookmarks.nvim',
--- tag = 'release' -- To use the latest release
-}
-
-```
-
-## Usage
-
-For basic setup with all default configs using [packer.nvim]
-
-```lua
-use {
-  'tomasky/bookmarks.nvim',
-  -- after = "telescope.nvim",
-  event = "VimEnter",
-  config = function()
-    require('bookmarks').setup()
-  end
-}
-```
-
-Here is an example with most of the default settings:
-
-```lua
-require('bookmarks').setup {
-  -- sign_priority = 8,  --set bookmark sign priority to cover other sign
-  save_file = vim.fn.expand "$HOME/.bookmarks", -- bookmarks save file path
-  keywords =  {
-    ["@t"] = "☑️ ", -- mark annotation startswith @t ,signs this icon as `Todo`
-    ["@w"] = "⚠️ ", -- mark annotation startswith @w ,signs this icon as `Warn`
-    ["@f"] = "⛏ ", -- mark annotation startswith @f ,signs this icon as `Fix`
-    ["@n"] = " ", -- mark annotation startswith @n ,signs this icon as `Note`
+{
+  'goropikari/bookmarks.nvim',
+  dependencies = {
+    'nvim-telescope/telescope.nvim',
   },
-  on_attach = function(bufnr)
-    local bm = require "bookmarks"
-    local map = vim.keymap.set
-    map("n","mm",bm.bookmark_toggle) -- add or remove bookmark at current line
-    map("n","mi",bm.bookmark_ann) -- add or edit mark annotation at current line
-    map("n","mc",bm.bookmark_clean) -- clean all marks in local buffer
-    map("n","mn",bm.bookmark_next) -- jump to next mark in local buffer
-    map("n","mp",bm.bookmark_prev) -- jump to previous mark in local buffer
-    map("n","ml",bm.bookmark_list) -- show marked file list in quickfix window
-    map("n","mx",bm.bookmark_clear_all) -- removes all bookmarks
-  end
-}
+  opts = {
+    save_file = vim.fn.stdpath('state') .. '/bookmarks.nvim/bookmark', -- bookmarks save file path
+    keywords =  {
+      ["@t"] = "☑️ ", -- mark annotation startswith @t ,signs this icon as `Todo`
+      ["@w"] = "⚠️ ", -- mark annotation startswith @w ,signs this icon as `Warn`
+      ["@f"] = "⛏ ", -- mark annotation startswith @f ,signs this icon as `Fix`
+      ["@n"] = " ", -- mark annotation startswith @n ,signs this icon as `Note`
+    },
+    sign_priority = 6, --set bookmark sign priority to cover other sign
+    signcolumn = true,
+    numhl = false,
+    linehl = false,
+    on_attach = function(bufnr)
+      local bm = require "bookmarks"
+      local map = vim.keymap.set
+      map("n","mm",bm.bookmark_toggle) -- add or remove bookmark at current line
+      map("n","mi",bm.bookmark_ann) -- add or edit mark annotation at current line
+      map("n","mc",bm.bookmark_clean) -- clean all marks in local buffer
+      map("n","mn",bm.bookmark_next) -- jump to next mark in local buffer
+      map("n","mp",bm.bookmark_prev) -- jump to previous mark in local buffer
+      map("n","ml",bm.bookmark_list) -- show marked file list in quickfix window
+      map("n","mx",bm.bookmark_clear_all) -- removes all bookmarks
+    end,
+    signs = {
+      add = { hl = 'BookMarksAdd', text = '⚑', numhl = 'BookMarksAddNr', linehl = 'BookMarksAddLn' },
+      ann = { hl = 'BookMarksAnn', text = '♥', numhl = 'BookMarksAnnNr', linehl = 'BookMarksAnnLn' },
+    },
+  },
+  keys = {
+    {
+      '<leader>ra',
+      function()
+        require('bookmarks').bookmark_toggle()
+      end,
+      desc = 'bookmark toggle',
+    },
+    {
+      '<leader>rcc',
+      function()
+        require('bookmarks').bookmark_clean()
+      end,
+      desc = 'bookmark clear at current buffer',
+    },
+    {
+      '<leader>rca',
+      function()
+        require('bookmarks').bookmark_clear_all()
+      end,
+      desc = 'bookmark clear all',
+    },
+    {
+      '<leader>rl',
+      function()
+        require('telescope').extensions.bookmarks.list()
+      end,
+      desc = 'bookmark list',
+    },
+  },
+  build = function()
+    vim.system({ 'mkdir', '-p', vim.fn.stdpath('state') .. '/bookmarks.nvim' })
+  end,
+},
 ```
 
 ## Telescope
